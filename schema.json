@@ -1,0 +1,2063 @@
+{
+  "$schema":"http://json-schema.org/draft-07/schema#",
+  "title":"Template",
+  "description":"Monitoring template for DDAU3, updated for software rev 1.7",
+  "definitions":
+  {
+    "idString":
+    {
+      "description": "Unique ID, with restricted character set",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9#./_=-]*$"
+    }
+  },
+  "type":"object",
+  "properties":
+  {
+    "channel":
+    {
+      "title":"Channels",
+      "description":"Input channel configuration",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "id":
+          {
+            "description":"Channel ID",
+            "$ref": "#/definitions/idString"
+          },
+          "name":
+          {
+            "description":"Machine related channel name [not used]",
+            "type":"string"
+          },
+          "ch_idx":
+          {
+            "description":"Channel index, 0-11 is AC/DC, 12-15 is Speed/DC, 16-23 is 4-20mA",
+            "type":"integer",
+            "minimum":0,
+            "maximum":23
+          },
+          "transducertype":
+          {
+            "description":"Physical dimension of input",
+            "type":"string"
+          },
+          "sensortype":
+          {
+            "description":"Sensor type [not used]",
+            "type":"string"
+          },
+          "sensitivity":
+          {
+            "description":"Channel gain factor",
+            "type":"number",
+            "minimum":0,
+            "exclusiveMinimum":true
+          },
+          "offset":
+          {
+            "description":"Channel BIAS voltage",
+            "type":"number"
+          },
+          "limit_positive":
+          {
+            "description":"Highest valid value (before gain)",
+            "type":"number",
+            "minimum":-28,
+            "maximum":28
+          },
+          "limit_negative":
+          {
+            "description":"Lowest valid value (before gain)",
+            "type":"number",
+            "minimum":-28,
+            "maximum":28
+          },
+          "low_threshold":
+          {
+            "description":"Low trigger level for tacho",
+            "type":"number",
+            "minimum":-28,
+            "maximum":28
+          },
+          "high_threshold":
+          {
+            "description":"High trigger level for tacho",
+            "type":"number",
+            "minimum":-28,
+            "maximum":28
+          },
+          "enable":
+          {
+            "description":"Channel enable flag",
+            "type":"boolean"
+          },
+          "CCS":
+          {
+            "description":"Constant current supply",
+            "type":"boolean"
+          },
+          "namur":
+          {
+            "description":"Namur compatibility for speed and current channels",
+            "type":"boolean"
+          }
+        },
+        "required":["id", "ch_idx", "enable"],
+        "additionalProperties":false
+      }
+    },
+    "import":
+    {
+      "title":"Imports",
+      "description":"Import channel configuration",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "id":
+          {
+            "description":"Import channel ID",
+            "$ref": "#/definitions/idString"
+          },
+          "ch_idx":
+          {
+            "description":"Import channel index",
+            "type":"integer"
+          },
+          "unit":
+          {
+            "description":"Unit of imported value",
+            "type":"string"
+          }
+        },
+        "required":["id", "ch_idx"],
+        "additionalProperties":false
+      }
+    },
+    "unit_conversions":
+    {
+      "title":"Units",
+      "description":"Definition of units used in the template",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "physical_quantity":
+          {
+            "description":"Physical quantity of the unit in the group",
+            "type":"string"
+          },
+          "standard_unit":
+          {
+            "description":"Default unit for the group",
+            "type":"string"
+          },
+          "units":
+          {
+            "description":"Units in the group",
+            "type":"array",
+            "items":
+            {
+              "type":"object",
+              "properties":
+              {
+                "name":
+                {
+                  "description":"Descriptive unit name",
+                  "type":"string"
+                },
+                "short":
+                {
+                  "description":"Apprehension for the unit",
+                  "type":"string"
+                },
+                "factor":
+                {
+                  "description":"Multiplication factor for this unit (relative to default)",
+                  "type":"number"
+                }
+              },
+              "required":["name", "short", "factor"],
+              "additionalProperties":false
+            }
+          }
+        },
+        "required":["standard_unit", "units"],
+        "additionalProperties":false
+      }
+    },
+    "vic":
+    {
+      "title":"Vics",
+      "description":"List of VIC registers",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "reg":
+          {
+            "description":"Register number",
+            "type":"integer"
+          },
+          "input":
+          {
+            "description":"Name of input to register",
+            "$ref": "#/definitions/idString"
+          },
+          "name":
+          {
+            "description":"Presented name of the register",
+            "type":"string"
+          },
+          "physical_quantity":
+          {
+            "description":"Physical quantity of the unit in the group [not used]",
+            "type":"string"
+          },
+          "unit":
+          {
+            "description":"Unit of the register value",
+            "type":"string"
+          },
+          "okrangelow":
+          {
+            "description":"NOT USED",
+            "type":"number"
+          },
+          "okrangehigh":
+          {
+            "description":"NOT USED",
+            "type":"number"
+          },
+          "history":
+          {
+            "description":"History",
+            "type":"object",
+            "properties":
+            {
+              "ds":
+              {
+                "description":"Sample rate (seconds)",
+                "type":"integer"
+              },
+              "timer":
+              {
+                "description":"Flash storage timer (hours)",
+                "type":"number"
+              },
+              "files":
+              {
+                "description":"Number of files in file rotation",
+                "type":"integer"
+              }
+            },
+            "required":["ds", "timer", "files"],
+            "additionalProperties":false
+          }
+        },
+        "required":["reg", "input"],
+        "additionalProperties":false
+      }
+    },
+    "vic_blocks":
+    {
+      "title":"VIC blocks",
+      "description":"List of blocks of VIC registers",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "name":
+          {
+            "description":"Block name",
+            "$ref": "#/definitions/idString"
+          },
+          "description":
+          {
+            "description":"Block description",
+            "type":"string"
+          },
+          "registers":
+          {
+            "description":"List of registers in block",
+            "type":"array"
+          }
+        },
+        "required":["name", "registers"],
+        "additionalProperties":false
+      }
+    },
+    "group_blocks":
+    {
+      "title":"VIC groups",
+      "description":"2nd level groups of VIC registers or VIC blocks",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "name":
+          {
+            "description":"Block name",
+            "$ref": "#/definitions/idString"
+          },
+          "description":
+          {
+            "description":"Block description",
+            "type":"string"
+          },
+          "blocks":
+          {
+            "description":"List of registers and blocks in group",
+            "type":"array"
+          }
+        },
+        "required":["name", "blocks"],
+        "additionalProperties":false
+      }
+    },
+    "l3storage":
+    {
+      "title":"L3Store",
+      "description":"List of stored level 3 descriptors",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "reg":
+          {
+            "description":"Register number",
+            "type":"integer"
+          },
+          "name":
+          {
+            "description":"Register name",
+            "type":"string"
+          },
+          "direction":
+          {
+            "description":"Register direction (in or out)",
+            "enum":["in", "out"]
+          },
+          "unit":
+          {
+            "description":"Register unit",
+            "type":"string"
+          },
+          "history":
+          {
+            "description":"History",
+            "type":"object",
+            "properties":
+            {
+              "ds":
+              {
+                "description":"Sample rate (seconds)",
+                "type":"integer"
+              },
+              "timer":
+              {
+                "description":"Flash storage timer (hours)",
+                "type":"number"
+              },
+              "files":
+              {
+                "description":"Number of files in file rotation",
+                "type":"integer"
+              }
+            },
+            "required":["ds", "timer", "files"],
+            "additionalProperties":false
+          }
+        },
+        "required":["reg", "name", "direction"],
+        "additionalProperties":false
+      }
+    },
+    "tacho":
+    {
+      "title":"Tacho",
+      "description":"Tacho channel configuration",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "id":
+          {
+            "description":"Tacho ID",
+            "$ref": "#/definitions/idString"
+          },
+          "name":
+          {
+            "description":"Machine related tacho name [not used]",
+            "type":"string"
+          },
+          "input":
+          {
+            "description":"Input channel",
+            "type":"string"
+          },
+          "minfreq":
+          {
+            "description":"Minimum frequency",
+            "type":"number",
+            "minimum":0,
+            "exclusiveMinimum":true
+          },
+          "maxfreq":
+          {
+            "description":"Maximum frequency",
+            "type":"number"
+          },
+          "edge":
+          {
+            "description":"Trigger edge (for DFTs)",
+            "enum":[0, 1, 2, 3]
+          },
+          "div":
+          {
+            "description":"Trigger divider for DFT starts",
+            "type":"integer"
+          },
+          "delay":
+          {
+            "description":"Trigger delay (in samples)",
+            "type":"integer"
+          },
+          "ppr":
+          {
+            "description":"Pulses per round",
+            "type":"number"
+          }
+        },
+        "required":["id", "input"],
+        "additionalProperties":false
+      }
+    },
+    "current":
+    {
+      "title":"Current",
+      "description":"Current channel configuration",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "id":
+          {
+            "description":"Current ID",
+            "$ref": "#/definitions/idString"
+          },
+          "input":
+          {
+            "description":"Input channel",
+            "type":"string"
+          }
+        },
+        "required":["id", "input"],
+        "additionalProperties":false
+      }
+    },
+    "trigger":
+    {
+      "title":"Triggers",
+      "description":"Trigger configuration",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "id":
+          {
+            "description":"Trigger ID",
+            "$ref": "#/definitions/idString"
+          },
+          "min_triggers":
+          {
+            "description":"Minimum number of valid conditions to trigger",
+            "type":"integer"
+          },
+          "input":
+          {
+            "description":"Digital inputs",
+            "type":"array",
+            "items":
+            {
+              "type":"object",
+              "properties":
+              {
+                "di":
+                {
+                  "description":"Digital input number",
+                  "type":"number"
+                },
+                "edge":
+                {
+                  "description":"Edge trigger",
+                  "enum":[0, 1]
+                },
+                "value":
+                {
+                  "description":"Level trigger",
+                  "enum":[0, 1]
+                }
+              },
+              "required":["di"],
+              "additionalProperties":false
+            }
+          },
+          "vic_group":
+          {
+            "description":"Triggered VIC block",
+            "type":"string"
+          },
+          "enable":
+          {
+            "description":"Trigger enable",
+            "type":"boolean"
+          }
+        },
+        "required":["id", "min_triggers", "input", "enable"],
+        "additionalProperties":false
+      }
+    },
+    "ringbuffer":
+    {
+      "title":"Ringbuffers",
+      "description":"Ringbuffer configuration",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "id":
+          {
+            "description":"Ringbuffer ID",
+            "$ref": "#/definitions/idString"
+          },
+          "input":
+          {
+            "description":"Channel input",
+            "type":"string"
+          },
+          "name":
+          {
+            "description":"Ringbuffer name",
+            "type":"string"
+          },
+          "length":
+          {
+            "description":"Buffer length in seconds",
+            "type":"number",
+            "minimum":0,
+            "exclusiveMinimum":true
+          },
+          "prebuffer":
+          {
+            "description":"Prebuffer length in seconds",
+            "type":"number"
+          },
+          "triggerid":
+          {
+            "description":"Trigger",
+            "type":"string"
+          },
+          "downsample":
+          {
+            "description":"Downsample",
+            "type":"integer"
+          },
+          "enable":
+          {
+            "description":"Ringbuffer enable",
+            "type":"boolean"
+          },
+          "double":
+          {
+            "description":"Enable double buffering",
+            "type":"boolean"
+          },
+          "storage":
+          {
+            "description":"Level 3 storage descriptor (use only for level 3)",
+            "type":"string"
+          },
+          "offset":
+          {
+            "description":"Level 3 read offset in samples",
+            "type":"integer"
+          },
+          "data_count":
+          {
+            "description":"Level 3 data count in samples",
+            "type":"integer"
+          },
+          "unit":
+          {
+            "description":"Output unit",
+            "type":"string"
+          },
+          "retrigger":
+          {
+            "description":"Trigger (index) to trigger when buffer stops",
+            "type":"integer"
+          },
+          "create_timestamp":
+          {
+            "description":"Create a timestamp for user modules to use",
+            "type":"boolean"
+          },
+          "stop_retrigger":
+          {
+            "description":"Stop retrigger mechanisms",
+            "type":"boolean"
+          },
+          "comment":
+          {
+            "description":"Comment",
+            "type":"string"
+          }
+        },
+        "required":["id", "input", "length", "enable"],
+        "additionalProperties":false
+      }
+    },
+    "din":
+    {
+      "title":"Digital In",
+      "description":"Digital input configuration",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "id":
+          {
+            "description":"DIN ID",
+            "$ref": "#/definitions/idString"
+          }
+        },
+        "required":["id"],
+        "additionalProperties":false
+      }
+    },
+    "dout":
+    {
+      "title":"Digital Out",
+      "description":"Digital output configuration",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "number":
+          {
+            "description":"Output number",
+            "enum":[0, 1]
+          },
+          "triggerid":
+          {
+            "description":"Trigger",
+            "type":"string"
+          },
+          "invert":
+          {
+            "description":"Invert signal",
+            "type":"boolean"
+          }
+        },
+        "required":["number", "triggerid"],
+        "additionalProperties":false
+      }
+    },
+    "level1":
+    {
+      "title":"Level1",
+      "description":"Level 1 superblock configuration",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "type":
+          {
+            "description":"Superblock type",
+            "enum":["PT", "BP", "BPV", "BPi", "BPii", "ECU", "NB", "NBECU", "BCU"]
+          },
+          "id":
+          {
+            "description":"Superblock ID",
+            "$ref": "#/definitions/idString"
+          },
+          "input":
+          {
+            "description":"Input channel",
+            "type":"string"
+          },
+          "filter":
+          {
+            "description":"Filters",
+            "type":"array",
+            "items":
+            {
+              "type":"object",
+              "properties":
+              {
+                "order":
+                {
+                  "description":"Filter order",
+                  "enum":[1, 2, 3, 4, 6]
+                },
+                "lf":
+                {
+                  "description":"Lower cutoff frequency",
+                  "type":"number",
+                  "oneOf":
+                  [
+                    {
+                      "minimum":0.65,
+                      "maximum":102400
+                    },
+                    {
+                      "minimum":0,
+                      "maximum":0
+                    }
+                  ]
+                },
+                "lfactor":
+                {
+                  "description":"Factor multiplied with lf (backwards compatibility)",
+                  "type":"number"
+                },
+                "uf":
+                {
+                  "description":"Upper cutoff frequency",
+                  "type":"number",
+                  "oneOf":
+                  [
+                    {
+                      "minimum":0.65,
+                      "maximum":102400
+                    },
+                    {
+                      "minimum":0,
+                      "maximum":0
+                    }
+                  ]
+                },
+                "ufactor":
+                {
+                  "description":"Factor multiplied with uf (backwards compatibility)",
+                  "type":"number"
+                },
+                "track":
+                {
+                  "description":"Tracking tacho ID",
+                  "type":"string"
+                },
+                "low_factor":
+                {
+                  "description":"Factor to be multiplied with tacho speed for lower cutoff frequency",
+                  "type":"number"
+                },
+                "high_factor":
+                {
+                  "description":"Factor to be multiplied with tacho speed for upper cutoff frequency",
+                  "type":"number"
+                }
+              }
+            }
+          },
+          "dft":
+          {
+            "description":"DFTs",
+            "type":"array",
+            "items":
+            {
+              "type":"object",
+              "properties":
+              {
+                "cf":
+                {
+                  "description":"Center frequency",
+                  "type":"number",
+                  "minimum":0.15,
+                  "maximum":102400
+                },
+                "cfactor":
+                {
+                  "description":"Factor multiplied with cf (backwards compatibility)",
+                  "type":"number"
+                },
+                "bw":
+                {
+                  "description":"Bandwidth",
+                  "type":"number"
+                },
+                "tacho":
+                {
+                  "description":"ID of trigger tacho",
+                  "type":"string"
+                },
+                "fixed":
+                {
+                  "description":"Fixed (true) or tracking (false)",
+                  "type":"boolean"
+                }
+              },
+              "required":["cf", "bw", "fixed", "tacho"],
+              "additionalProperties":false
+            }
+          },
+          "t_avg":
+          {
+            "description":"Averaging time",
+            "type":"integer",
+            "minimum":1
+          },
+          "enable":
+          {
+            "description":"Block enable",
+            "type":"boolean"
+          },
+          "downsample":
+          {
+            "description":"Filter initial downsample",
+            "enum":[0, 1, 2, 4, 8, 16, 32, 64]
+          },
+          "downsample2":
+          {
+            "description":"Filter intermediant downsample",
+            "enum":[0, 1, 2, 4, 8, 16, 32, 64]
+          },
+          "comment":
+          {
+            "description":"Comment",
+            "type":"string"
+          }
+        },
+        "required":["type", "id", "input", "filter", "enable"],
+        "additionalProperties":false
+      }
+    },
+    "level3":
+    {
+      "title":"Level3",
+      "description":"Level 3 module configuration",
+      "type":"array",
+      "items":
+      {
+        "description":"Supermodule configuration",
+        "type":"object",
+        "properties":
+        {
+          "id":
+          {
+            "description":"Supermodule ID",
+            "$ref": "#/definitions/idString"
+          },
+          "timer":
+          {
+            "description":"Supermodule repeat timer",
+            "type":"number"
+          },
+          "timeout":
+          {
+            "description":"Supermodule timeout enable",
+            "type":"boolean"
+          },
+          "enable":
+          {
+            "description":"Supermodule general enable",
+            "type":"boolean"
+          },
+          "modules":
+          {
+            "description":"Supermodule module list",
+            "type":"object",
+            "properties":
+            {
+              "user_modules":
+              {
+                "type":"array",
+                "items":
+                {
+                  "description":"User module configuration",
+                  "type":"object",
+                  "properties":
+                  {
+                    "id":
+                    {
+                      "description":"Module ID",
+                      "$ref": "#/definitions/idString"
+                    },
+                    "module":
+                    {
+                      "description":"Module",
+                      "$ref": "#/definitions/idString"
+                    },
+                    "inputs":
+                    {
+                      "description":"Module input(s)",
+                      "type":"array",
+                      "items":
+                      {
+                        "description":"Module input list",
+                        "type":"object",
+                        "properties":
+                        {
+                          "input":
+                          {
+                            "description":"input channel",
+                            "type":"string"
+                          }
+                        },
+                        "required":["input"],
+                        "additionalProperties":false
+                      }
+                    },
+                    "args":
+                    {
+                      "description":"Module argument(s)",
+                      "type":"array",
+                      "items":
+                      {
+                        "description":"Module argument list",
+                        "type":"object"
+                      }
+                    },
+                    "output_unit":
+                    {
+                      "description":"Output unit",
+                      "type":"string"
+                    },
+                    "backup_every":
+                    {
+                      "description":"Backup timer",
+                      "type":"number"
+                    },
+                    "repeat_every":
+                    {
+                      "description":"How often the module can run",
+                      "type":"number"
+                    },
+                    "valid_for":
+                    {
+                      "description":"How long an input descriptor stays valid",
+                      "type":"number"
+                    },
+                    "binclass_input":
+                    {
+                      "description":"Bin class input",
+                      "type":"string"
+                    },
+                    "binclass_states":
+                    {
+                      "description":"Bin class states",
+                      "type":"object",
+                      "patternProperties":
+                      {
+                        ".*":
+                        {
+                          "description":"Bin class state",
+                          "type":"object",
+                          "properties":
+                          {
+                            "output":
+                            {
+                              "description":"output descriptor",
+                              "type":"string"
+                            }
+                          },
+                          "required":["output"],
+                          "additionalProperties":true
+                        }
+                      },
+                      "additionalProperties":true
+                    }
+                  },
+                  "required":["id", "module", "inputs"],
+                  "dependencies":
+                  {
+                    "binclass_input":["binclass_states"]
+                  },
+                  "additionalProperties":true
+                }
+              },
+              "alarms":
+              {
+                "description":"Alarm modules",
+                "type":"array",
+                "items":
+                {
+                  "description":"Alarm",
+                  "type":"object",
+                  "properties":
+                  {
+                    "id":
+                    {
+                      "description":"Alarm ID",
+                      "$ref": "#/definitions/idString"
+                    },
+                    "src":
+                    {
+                      "description":"Input descriptor",
+                      "type":"string"
+                    },
+                    "dst":
+                    {
+                      "description":"Output descriptor",
+                      "type":"string"
+                    },
+                    "default_state_value":
+                    {
+                      "description":"Output value in default state",
+                      "type":"number"
+                    },
+                    "nan_state_value":
+                    {
+                      "description":"Output value in NAN state",
+                      "type":"number"
+                    },
+                    "reference":
+                    {
+                      "description":"Reference level",
+                      "oneOf":
+                      [
+                        {
+                          "type":"number"
+                        },
+                        {
+                          "enum":["-inf", "inf"]
+                        }
+                      ]
+                    },
+                    "limits":
+                    {
+                      "description":"List of alarm limits",
+                      "type":"array",
+                      "items":
+                      {
+                        "description":"Alarm states",
+                        "type":"object",
+                        "properties":
+                        {
+                          "limit":
+                          {
+                            "description":"Alarm state",
+                            "type":"number"
+                          },
+                          "time_threshold":
+                          {
+                            "description":"Time for value to be above limit to enter state",
+                            "type":"integer"
+                          },
+                          "time_threshold_exit":
+                          {
+                            "description":"Time for value to be below limit to leave state",
+                            "type":"integer"
+                          },
+                          "state_value":
+                          {
+                            "description":"Output value from state",
+                            "type":"number"
+                          }
+                        },
+                        "required":["limit", "state_value"],
+                        "additionalProperties":true
+                      }
+                    }
+                  },
+                  "required":["id", "src", "dst"],
+                  "additionalProperties":false
+                }
+              },
+              "simple_expressions":
+              {
+                "description":"Simple expressions",
+                "type":"array",
+                "items":
+                {
+                  "description":"Simple expression",
+                  "type":"object",
+                  "properties":
+                  {
+                    "src":
+                    {
+                      "description":"Input descriptor",
+                      "type":"string"
+                    },
+                    "dst":
+                    {
+                      "description":"Output descriptor",
+                      "$ref": "#/definitions/idString"
+                    },
+                    "function":
+                    {
+                      "description":"Simple expression function",
+                      "type":"string"
+                    },
+                    "samples":
+                    {
+                      "description":"Number of samples",
+                      "type":"integer"
+                    }
+                  },
+                  "required":["src", "dst", "function"],
+                  "additionalProperties":false
+                }
+              },
+              "binclassifiers":
+              {
+                "description":"Bin classifiers",
+                "type":"array",
+                "items":
+                {
+                  "description":"Bin classifier",
+                  "type":"object",
+                  "properties":
+                  {
+                    "id":
+                    {
+                      "description":"Bin classifier ID",
+                      "$ref": "#/definitions/idString"
+                    },
+                    "inputs":
+                    {
+                      "description":"Bin classifier input list",
+                      "type":"array",
+                      "items":
+                      {
+                        "description":"Bin classifier input",
+                        "type":"object",
+                        "properties":
+                        {
+                          "input":
+                          {
+                            "description":"Input channel",
+                            "type":"string"
+                          },
+                          "name":
+                          {
+                            "description":"Reference name",
+                            "type":"string"
+                          }
+                        },
+                        "required":["input", "name"],
+                        "additionalProperties":false
+                      }
+                    },
+                    "dst":
+                    {
+                      "description":"Bin classifier output descriptor",
+                      "type":"string"
+                    },
+                    "bins":
+                    {
+                      "description":"List of bins in bin classifier",
+                      "type":"array",
+                      "items":
+                      {
+                        "description":"Bin",
+                        "type":"object",
+                        "properties":
+                        {
+                          "name":
+                          {
+                            "description":"Bin name",
+                            "$ref": "#/definitions/idString"
+                          }
+                        },
+                        "patternProperties":
+                        {
+                          "^((?!name).)*$":
+                          {
+                            "description":"Bin input range",
+                            "type":"object",
+                            "properties":
+                            {
+                              "min":
+                              {
+                                "description":"Minimum value",
+                                "type":"number"
+                              },
+                              "max":
+                              {
+                                "description":"Maximum value",
+                                "type":"number"
+                              }
+                            },
+                            "required":["min", "max"],
+                            "additionalProperties":false
+                          }
+                        },
+                        "required":["name"],
+                        "additionalProperties":false
+                      }
+                    }
+                  },
+                  "required":["id", "inputs", "dst", "bins"],
+                  "additionalProperties":false
+                }
+              },
+              "triggers":
+              {
+                "description":"Software triggers",
+                "type":"array",
+                "items":
+                {
+                  "description":"Software trigger configuration",
+                  "type":"object",
+                  "properties":
+                  {
+                    "id":
+                    {
+                      "description":"Trigger ID",
+                      "$ref": "#/definitions/idString"
+                    },
+                    "src":
+                    {
+                      "description":"Input descriptor",
+                      "type":"string"
+                    },
+                    "dst":
+                    {
+                      "description":"Output descriptor",
+                      "type":"string"
+                    },
+                    "low":
+                    {
+                      "description":"lower limit",
+                      "type":"number"
+                    },
+                    "high":
+                    {
+                      "description":"Upper limit",
+                      "type":"number"
+                    },
+                    "margin":
+                    {
+                      "description":"Margin",
+                      "type":"number"
+                    },
+                    "time":
+                    {
+                      "description":"Time to stay within margin",
+                      "type":"number"
+                    },
+                    "trigger":
+                    {
+                      "description":"Controlled hardware trigger",
+                      "type":"string"
+                    }
+                  },
+                  "required":["id", "src", "dst", "low", "high", "margin", "time", "trigger"],
+                  "additionalProperties":false
+                }
+              },
+              "additionalProperties":false
+            }
+          }
+        }
+      }
+    },
+    "push":
+    {
+      "title":"Push configuration",
+      "description":"Configuration for data pushing interface",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "id":
+          {
+            "description":"ID",
+            "$ref": "#/definitions/idString"
+          },
+          "trigger":
+          {
+            "description":"Trigger type",
+            "enum":["timer", "trigger", "remote"]
+          },
+          "trigger_data":
+          {
+            "description":"Data for trigger",
+            "type":"object",
+            "oneOf":
+            [
+              {
+                "properties":
+                {
+                  "trigger_index":
+                  {
+                    "description":"Index of trigger to watch",
+                    "type":"integer"
+                  },
+                  "min_timer":
+                  {
+                    "description":"Grace period (seconds)",
+                    "type":"number"
+                  }
+                },
+                "required":["trigger_index"],
+                "additionalProperties":false
+              },
+              {
+                "properties":
+                {
+                  "timer":
+                  {
+                    "description":"Run timer (seconds)",
+                    "type":"number"
+                  }
+                },
+                "required":["timer"],
+                "additionalProperties":false
+              },
+              {
+                "properties":
+                {
+                  "job_id":
+                  {
+                    "description":"Job ID",
+                    "type":"string"
+                  }
+                },
+                "required":["job_id"],
+                "additionalProperties":false
+              }
+            ]
+          },
+          "target":
+          {
+            "description":"Target device",
+            "enum":["vic", "history", "drb"]
+          },
+          "target_data":
+          {
+            "description":"Target device configuration",
+            "type":"object",
+            "oneOf":
+            [
+              {
+                "properties":
+                {
+                  "group":
+                  {
+                    "description":"VIC group",
+                    "type":"string"
+                  }
+                },
+                "required":["group"],
+                "additionalProperties":false
+              },
+              {
+                "properties":
+                {
+                  "group":
+                  {
+                    "description":"VIC group",
+                    "type":"string"
+                  },
+                  "begin":
+                  {
+                    "description":"Start time delta",
+                    "type":"integer",
+                    "maximum":0
+                  },
+                  "end":
+                  {
+                    "description":"End time delta",
+                    "type":"integer",
+                    "maximum":0
+                  }
+                },
+                "required":["group", "begin", "end"],
+                "additionalProperties":false
+              },
+              {
+                "properties":
+                {
+                  "trigger":
+                  {
+                    "description":"trigger group",
+                    "type":"string"
+                  }
+                },
+                "required":["trigger"],
+                "additionalProperties":false
+              }
+            ]
+          },
+          "config":
+          {
+            "description":"push configuration",
+            "type":"object",
+            "properties":
+            {
+              "refid":
+              {
+                "description":"Reference (for server)",
+                "type":"string"
+              },
+              "remote_server":
+              {
+                "description":"Name or IP for server",
+                "type":"string"
+              },
+              "port":
+              {
+                "description":"Server port",
+                "oneOf":
+                [
+                  {
+                    "type":"integer"
+                  },
+                  {
+                    "type":"string"
+                  }
+                ]
+              },
+              "retries":
+              {
+                "description":"Number of retries before giving up",
+                "type":"integer"
+              },
+              "delay":
+              {
+                "description":"Delay (in seconds) between retries",
+                "type":"number"
+              },
+              "timeout":
+              {
+                "description":"Timeout (in seconds) for each retry",
+                "type":"number"
+              },
+              "page":
+              {
+                "description":"Server page",
+                "type":"string"
+              },
+              "secure":
+              {
+                "description":"Set to use https",
+                "type":"boolean"
+              }
+            },
+            "required":["refid", "remote_server", "port", "retries", "delay", "timeout", "page", "secure"],
+            "additionalProperties":false
+          }
+        },
+        "required":["id", "trigger", "trigger_data", "target", "target_data", "config"],
+        "additionalProperties":false
+      }
+    },
+    "VestasAP":
+    {
+      "title":"Vestas AP",
+      "description":"Vestas AP protocol",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "id":
+          {
+            "description":"Job name",
+            "type":"string"
+          },
+          "enable":
+          {
+            "description":"Enable flag",
+            "type":"boolean"
+          },
+          "configuration":
+          {
+            "description":"Vestas AP configuration",
+            "type":"object",
+            "properties":
+            {
+              "server":
+              {
+                "description":"Server name or IP",
+                "type":"string"
+              },
+              "port":
+              {
+                "description":"Server port number",
+                "type":"integer"
+              },
+              "request_handle":
+              {
+                "description":"Request handle",
+                "type":"string"
+              },
+              "timeout":
+              {
+                "description":"Connection timeout (in seconds)",
+                "type":"number"
+              },
+              "timer":
+              {
+                "description":"Read timer (in seconds)",
+                "type":"number"
+              },
+              "username":
+              {
+                "description":"User name",
+                "type":"string"
+              },
+              "password":
+              {
+                "description":"Password",
+                "type":"string"
+              },
+              "return_time":
+              {
+                "description":"Ask for timestamp",
+                "type":"boolean"
+              },
+              "return_name":
+              {
+                "description":"Ask for name",
+                "type":"boolean"
+              },
+              "return_path":
+              {
+                "description":"Ask for full path",
+                "type":"boolean"
+              }
+            },
+            "required":["server", "port", "timer", "timeout", "request_handle", "return_time", "return_path", "return_name", "username", "password"],
+            "additionalProperties":false
+          },
+          "items":
+          {
+            "description":"Vestas AP registers",
+            "type":"array",
+            "list":
+            {
+              "description":"Vestas AP register",
+              "type":"object",
+              "properties":
+              {
+                "path":
+                {
+                  "description":"Path",
+                  "type":"string"
+                },
+                "name":
+                {
+                  "description":"Name",
+                  "type":"string"
+                },
+                "min":
+                {
+                  "description":"Minimum value",
+                  "type":"number"
+                },
+                "max":
+                {
+                  "description":"Maximum value",
+                  "type":"number"
+                },
+                "dest":
+                {
+                  "description":"Where to put value",
+                  "enum":["vic_reg", "vic_id", "level3", "import"]
+                },
+                "reg":
+                {
+                  "description":"Register",
+                  "oneOf":
+                  [
+                    {
+                      "type":"integer"
+                    },
+                    {
+                      "type":"string"
+                    }
+                  ]
+                }
+              },
+              "required":["name", "dest", "reg"],
+              "additionalProperties":false
+            }
+          }
+        },
+        "required":["id", "enable", "configuration", "items"],
+        "additionalProperties":false
+      }
+    },
+    "modbus":
+    {
+      "title":"Modbus",
+      "description":"Modbus configuration",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "id":
+          {
+            "description":"ID",
+            "type":"string"
+          },
+          "enable":
+          {
+            "description":"Enable",
+            "type":"boolean"
+          },
+          "type":
+          {
+            "description":"Modbus type",
+            "enum":["rtu_server", "tcp_server", "rtu_client", "tcp_client"]
+          },
+          "configuration":
+          {
+            "description":"Modbus configuration",
+            "type":"object",
+            "oneOf":
+            [
+              {
+                "properties":
+                {
+                  "device":
+                  {
+                    "description":"Device path",
+                    "type":"string"
+                  },
+                  "baud_rate":
+                  {
+                    "description":"Baud rate",
+                    "type":"integer"
+                  },
+                  "timeout":
+                  {
+                    "description":"Transfer timeout (seconds)",
+                    "type":"number"
+                  },
+                  "stopbits":
+                  {
+                    "description":"Stop bits",
+                    "enum":[0, 1, 2]
+                  },
+                  "bytesize":
+                  {
+                    "description":"Byte size",
+                    "type":"integer"
+                  },
+                  "parity":
+                  {
+                    "description":"Parity",
+                    "enum":["N", "O", "E"]
+                  },
+                  "refresh_interval":
+                  {
+                    "description":"Poll rate (seconds)",
+                    "type":"number"
+                  },
+                  "byte_order":
+                  {
+                    "description":"Byte order",
+                    "enum":["<", ">"]
+                  },
+                  "word_order":
+                  {
+                    "description":"Word order",
+                    "enum":["<", ">"]
+                  },
+                  "unit":
+                  {
+                    "description":"Modbus unit number",
+                    "type":"integer"
+                  }
+                },
+                "required":["device", "baud_rate", "timeout", "stopbits", "bytesize", "parity", "refresh_interval", "byte_order", "word_order", "unit"],
+                "additionalProperties":false
+              },
+              {
+                "properties":
+                {
+                  "port":
+                  {
+                    "description":"Server port",
+                    "type":"integer"
+                  },
+                  "address_range":
+                  {
+                    "description":"Allowed address range",
+                    "type":"string"
+                  },
+                  "refresh_interval":
+                  {
+                    "description":"Refresh interval (seconds)",
+                    "type":"number"
+                  },
+                  "byte_order":
+                  {
+                    "description":"Byte order",
+                    "enum":["<", ">"]
+                  },
+                  "word_order":
+                  {
+                    "description":"Word order",
+                    "enum":["<", ">"]
+                  },
+                  "unit":
+                  {
+                    "description":"Modbus unit number",
+                    "type":"integer"
+                  }
+                },
+                "required":["port", "address_range", "refresh_interval", "byte_order", "word_order", "unit"],
+                "additionalProperties":false
+              },
+              {
+                "properties":
+                {
+                  "remote_server":
+                  {
+                    "description":"Remote server nam/IP",
+                    "type":"string"
+                  },
+                  "port":
+                  {
+                    "description":"Remote server port",
+                    "type":"integer"
+                  },
+                  "timeout":
+                  {
+                    "description":"Connection timeout (seconds)",
+                    "type":"number"
+                  },
+                  "username":
+                  {
+                    "description":"Remote server username",
+                    "type":"string"
+                  },
+                  "password":
+                  {
+                    "description":"Remote server password",
+                    "type":"string"
+                  },
+                  "refresh_interval":
+                  {
+                    "description":"Poll rate (seconds)",
+                    "type":"number"
+                  },
+                  "byte_order":
+                  {
+                    "description":"Byte order",
+                    "enum":["<", ">"]
+                  },
+                  "word_order":
+                  {
+                    "description":"Word order",
+                    "enum":["<", ">"]
+                  },
+                  "unit":
+                  {
+                    "description":"Modbus unit number",
+                    "type":"integer"
+                  }
+                },
+                "required":["remote_server", "port", "timeout", "byte_order", "word_order", "unit", "refresh_interval"],
+                "additionalProperties":false
+              }
+            ]
+          },
+          "registers":
+          {
+            "description":"Modbus register list",
+            "type":"object",
+            "properties":
+            {
+              "reads":
+              {
+                "description":"Read registers",
+                "type":"array",
+                "list":
+                {
+                  "description":"Read register",
+                  "type":"object",
+                  "properties":
+                  {
+                    "table_address":
+                    {
+                      "description":"Modbus address",
+                      "type":"integer"
+                    },
+                    "type":
+                    {
+                      "description":"Data type",
+                      "enum":["float", "int", "uint", "float16", "float32", "float64", "int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64", "string8", "string16", "string32"]
+                    },
+                    "min":
+                    {
+                      "description":"Minimum value",
+                      "type":"number"
+                    },
+                    "max":
+                    {
+                      "description":"Maximum value",
+                      "type":"number"
+                    },
+                    "dest":
+                    {
+                      "description":"Where to put data",
+                      "enum":["vic_reg", "vic_id"]
+                    },
+                    "reg":
+                    {
+                      "description":"Register",
+                      "oneOf":
+                      [
+                        {
+                          "type":"integer"
+                        },
+                        {
+                          "type":"string"
+                        }
+                      ]
+                    },
+                    "fc":
+                    {
+                      "description":"Function code (1=read coils, 2=read discrete input, 3=read holding registers, 4=read input registers)",
+                      "enum":[1, 2, 3, 4]
+                    }
+                  },
+                  "required":["table_address", "type", "dest", "reg", "fc"],
+                  "additionalProperties":false
+                }
+              },
+              "writes":
+              {
+                "description":"Write registers",
+                "type":"array",
+                "list":
+                {
+                  "description":"Write register",
+                  "type":"object",
+                  "properties":
+                  {
+                    "table_address":
+                    {
+                      "description":"Modbus address",
+                      "type":"integer"
+                    },
+                    "type":
+                    {
+                      "description":"Data type",
+                      "enum":["float"]
+                    },
+                    "min":
+                    {
+                      "description":"Minimum value",
+                      "type":"number"
+                    },
+                    "max":
+                    {
+                      "description":"Maximum value",
+                      "type":"number"
+                    },
+                    "dest":
+                    {
+                      "description":"Where to put data",
+                      "enum":["vic_reg", "vic_id"]
+                    },
+                    "reg":
+                    {
+                      "description":"Register",
+                      "oneOf":
+                      [
+                        {
+                          "type":"integer"
+                        },
+                        {
+                          "type":"string"
+                        }
+                      ]
+                    },
+                    "fc":
+                    {
+                      "description":"Function code (1=read coils, 2=read discrete input, 3=read holding registers, 4=read input registers, 5=write coil, 6=write register, 15=write coils, 16=write registers)",
+                      "enum":[1, 2, 3, 4, 5, 6, 15, 16]
+                    }
+                  },
+                  "required":["table_address", "type", "dest", "reg", "fc"],
+                  "additionalProperties":false
+                }
+              }
+            },
+            "required":[],
+            "additionalProperties":false
+          }
+        },
+        "required":["id", "enable", "type", "configuration", "registers"],
+        "additionalProperties":false
+      }
+    },
+    "OPCUA":
+    {
+      "title":"OPCUA",
+      "description":"OPCUA configuration",
+      "type":"array",
+      "items":
+      {
+        "type":"object",
+        "properties":
+        {
+          "session_id":
+          {
+            "description":"Session ID",
+            "type":"string"
+          },
+          "enable":
+          {
+            "description":"Enable",
+            "type":"boolean"
+          },
+          "configuration":
+          {
+            "description":"Configuration",
+            "type":"object",
+            "properties":
+            {
+              "endpoint":
+              {
+                "description":"Server endpoint",
+                "type":"string"
+              },
+              "security_policy":
+              {
+                "description":"Security policy",
+                "type":"string"
+              },
+              "message_security_mode":
+              {
+                "description":"Message security mode",
+                "type":"string"
+              },
+              "user_identity":
+              {
+                "description":"User identification method",
+                "type":"string"
+              },
+              "user_configuration":
+              {
+                "description":"User configuration",
+                "type":"object",
+                "properties":
+                {
+                },
+                "additionalProperties": true
+              },
+              "poll_interval":
+              {
+                "description":"Time between polls",
+                "type":"integer"
+              },
+              "timeout":
+              {
+                "description":"Timeout in seconds",
+                "type":"integer"
+              }
+            },
+            "required":["endpoint", "security_policy", "message_security_mode", "user_identity", "user_configuration"],
+            "additionalProperties":false
+          },
+          "namespace":
+          {
+            "description":"Namespaces",
+            "type":"array",
+            "items":
+            {
+              "type":"object",
+              "properties":
+              {
+                "model":
+                {
+                  "description":"Server model",
+                  "type":"string"
+                },
+                "items":
+                {
+                  "description":"List of items to import",
+                  "type":"array",
+                  "items":
+                  {
+                    "type":"object",
+                    "properties":
+                    {
+                      "path":
+                      {
+                        "description":"OPCUA path",
+                        "type":"string"
+                      },
+                      "dest":
+                      {
+                        "description":"VIC type",
+                        "type":"string"
+                      },
+                      "reg":
+                      {
+                        "description":"VIC register",
+                        "oneOf":
+                        [
+                          {
+                            "type":"string"
+                          },
+                          {
+                            "type":"integer"
+                          }
+                        ]
+                      }
+                    },
+                    "required":["path", "dest", "reg"],
+                    "additionalProperties":false
+                  }
+                }
+              },
+              "required":["model", "items"],
+              "additionalProperties":false
+            }
+          }
+        },
+        "required":["session_id", "configuration", "namespace"],
+        "additionalProperties":false
+      }
+    }
+  },
+  "required":["channel", "vic", "level1"],
+  "additionalProperties":true
+}
+
